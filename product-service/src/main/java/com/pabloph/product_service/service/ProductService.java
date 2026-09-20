@@ -4,12 +4,13 @@ import com.pabloph.product_service.dto.CreateProductRequest;
 import com.pabloph.product_service.dto.ProductResponse;
 import com.pabloph.product_service.dto.UpdateProductRequest;
 import com.pabloph.product_service.dto.UpdateStockRequest;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ProductService {
 
-    ProductResponse createProduct(CreateProductRequest request);
+    ProductResponse createProduct(@Valid CreateProductRequest request);
 
     ProductResponse getProductById(Long id);
 
@@ -19,9 +20,9 @@ public interface ProductService {
 
     Page<ProductResponse> searchProducts(String name, Pageable pageable);
 
-    ProductResponse updateProduct(Long id, UpdateProductRequest request);
+    ProductResponse updateProduct(Long id, @Valid UpdateProductRequest request);
 
-    ProductResponse updateStock(Long id, UpdateStockRequest request);
+    ProductResponse updateStock(Long id, @Valid UpdateStockRequest request);
 
     void deleteProduct(Long id);
 }

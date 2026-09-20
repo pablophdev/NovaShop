@@ -14,6 +14,10 @@ public record CreateProductRequest(
         String name,
 
         @NotBlank
+        @Size(max = 100)
+        String sku,
+
+        @NotBlank
         @Size(max = 1000)
         String description,
 
