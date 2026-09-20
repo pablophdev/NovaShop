@@ -21,6 +21,18 @@
                 "DB_USERNAME": "root",
                 "DB_PASSWORD": "123123"
             }
+        },
+        {
+            "type": "java",
+            "name": "CustomerServiceApplication",
+            "request": "launch",
+            "mainClass": "com.pabloph.customer_service.CustomerServiceApplication",
+            "projectName": "customer-service",
+            "env": {
+                "DB_URL": "jdbc:mysql://localhost:3306/db_customers",
+                "DB_USERNAME": "root",
+                "DB_PASSWORD": "123123"
+            }
         }
     ]
 }

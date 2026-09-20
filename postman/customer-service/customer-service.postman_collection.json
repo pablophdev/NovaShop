@@ -1,0 +1,135 @@
+{
+  "info": {
+    "name": "Customer Service",
+    "description": "Coleccion para probar el microservicio customer-service en local.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "customerId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Customer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Pablo\",\n  \"lastName\": \"Perez\",\n  \"email\": \"pablo.perez@example.com\",\n  \"phone\": \"+5491123456789\",\n  \"address\": \"Av. Siempre Viva 123\",\n  \"active\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/customers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "customers"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Customers",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/customers?page=0&size=10",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "customers"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "10"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Customer By Id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/customers/{{customerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "customers",
+            "{{customerId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Customer",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Pablo\",\n  \"lastName\": \"Perez Updated\",\n  \"email\": \"pablo.perez@example.com\",\n  \"phone\": \"+5491198765432\",\n  \"address\": \"Av. Siempre Viva 456\",\n  \"active\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/customers/{{customerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "customers",
+            "{{customerId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Customer",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/customers/{{customerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "customers",
+            "{{customerId}}"
+          ]
+        }
+      }
+    }
+  ]
+}
