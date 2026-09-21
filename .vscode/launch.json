@@ -33,6 +33,20 @@
                 "DB_USERNAME": "root",
                 "DB_PASSWORD": "123123"
             }
+        },
+        {
+            "type": "java",
+            "name": "OrderServiceApplication",
+            "request": "launch",
+            "mainClass": "com.pabloph.order_service.OrderServiceApplication",
+            "projectName": "order-service",
+            "env": {
+                "DB_URL": "jdbc:mysql://localhost:3306/db_orders",
+                "DB_USERNAME": "root",
+                "DB_PASSWORD": "123123",
+                "CUSTOMER_SERVICE_URL": "http://localhost:8081",
+                "PRODUCT_SERVICE_URL": "http://localhost:8080"
+            }
         }
     ]
 }
