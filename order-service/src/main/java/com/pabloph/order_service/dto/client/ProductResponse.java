@@ -1,4 +1,4 @@
-package com.pabloph.order_service.dto;
+package com.pabloph.order_service.dto.client;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

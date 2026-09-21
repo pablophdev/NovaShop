@@ -1,7 +1,7 @@
 package com.pabloph.order_service.client;
 
-import com.pabloph.order_service.dto.ProductResponse;
-import com.pabloph.order_service.dto.UpdateStockRequest;
+import com.pabloph.order_service.dto.client.ProductResponse;
+import com.pabloph.order_service.dto.client.UpdateStockRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
