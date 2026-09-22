@@ -6,8 +6,8 @@ spring:
     name: api-gateway
   security:
     user:
-      name: admin
-      password: admin123
+      name: ${GATEWAY_USER}
+      password: ${GATEWAY_PASSWORD}
   cloud:
     gateway:
       server:
