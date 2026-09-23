@@ -4,10 +4,6 @@ server:
 spring:
   application:
     name: api-gateway
-  security:
-    user:
-      name: ${GATEWAY_USER}
-      password: ${GATEWAY_PASSWORD}
   cloud:
     gateway:
       server:
@@ -32,3 +28,6 @@ spring:
               uri: ${AUTH_SERVICE_URI:http://localhost:8083}
               predicates:
                 - Path=/api/auth/**
+
+jwt:
+  secret: ${JWT_SECRET:nova-shop-local-development-secret-key}

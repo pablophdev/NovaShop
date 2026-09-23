@@ -61,6 +61,20 @@
                 "JWT_SECRET": "nova-shop-local-development-secret-key",
                 "JWT_EXPIRATION": "3600000"
             }
+        },
+        {
+            "type": "java",
+            "name": "ApiGatewayApplication",
+            "request": "launch",
+            "mainClass": "com.pabloph.api_gateway.ApiGatewayApplication",
+            "projectName": "api-gateway",
+            "env": {
+                "PRODUCT_SERVICE_URI": "http://localhost:8080",
+                "CUSTOMER_SERVICE_URI": "http://localhost:8081",
+                "ORDER_SERVICE_URI": "http://localhost:8082",
+                "AUTH_SERVICE_URI": "http://localhost:8083",
+                "JWT_SECRET": "nova-shop-local-development-secret-key"
+            }
         }
     ]
 }
