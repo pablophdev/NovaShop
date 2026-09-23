@@ -47,6 +47,20 @@
                 "CUSTOMER_SERVICE_URL": "http://localhost:8081",
                 "PRODUCT_SERVICE_URL": "http://localhost:8080"
             }
+        },
+        {
+            "type": "java",
+            "name": "MsAuthApplication",
+            "request": "launch",
+            "mainClass": "com.pabloph.ms_auth.MsAuthApplication",
+            "projectName": "ms-auth",
+            "env": {
+                "DB_URL": "jdbc:mysql://localhost:3306/db_auth",
+                "DB_USERNAME": "root",
+                "DB_PASSWORD": "123123",
+                "JWT_SECRET": "nova-shop-local-development-secret-key",
+                "JWT_EXPIRATION": "3600000"
+            }
         }
     ]
 }
