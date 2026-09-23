@@ -52,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime now = LocalDateTime.now();
         Order order = new Order();
         order.setCustomerId(request.customerId());
-        order.setStatus(OrderStatus.CONFIRMED);
+        order.setStatus(OrderStatus.PENDING);
         order.setCreatedAt(now);
         order.setUpdatedAt(now);
 
@@ -82,8 +82,10 @@ public class OrderServiceImpl implements OrderService {
 
         Order savedOrder = orderRepository.save(order);
         updateProductsStock(request.items());
+        savedOrder.setStatus(OrderStatus.CONFIRMED);
+        savedOrder.setUpdatedAt(LocalDateTime.now());
 
-        return toResponse(savedOrder);
+        return toResponse(orderRepository.save(savedOrder));
     }
 
     @Override
@@ -106,9 +108,13 @@ public class OrderServiceImpl implements OrderService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Order is already cancelled");
         }
 
+        boolean shouldRestoreStock = OrderStatus.CONFIRMED.equals(order.getStatus());
+
         order.setStatus(OrderStatus.CANCELLED);
         order.setUpdatedAt(LocalDateTime.now());
-        restoreProductsStock(order.getItems());
+        if (shouldRestoreStock) {
+            restoreProductsStock(order.getItems());
+        }
 
         return toResponse(orderRepository.save(order));
     }
