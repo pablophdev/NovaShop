@@ -14,6 +14,8 @@ import com.pabloph.order_service.entity.OrderItem;
 import com.pabloph.order_service.entity.OrderStatus;
 import com.pabloph.order_service.repository.OrderRepository;
 import com.pabloph.order_service.service.OrderService;
+import feign.FeignException;
+import feign.RetryableException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -44,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse createOrder(CreateOrderRequest request) {
-        CustomerResponse customer = customerClient.getCustomerById(request.customerId());
+        CustomerResponse customer = getCustomer(request.customerId());
         if (!Boolean.TRUE.equals(customer.active())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer is not active");
         }
@@ -60,7 +62,7 @@ public class OrderServiceImpl implements OrderService {
         List<OrderItem> items = new ArrayList<>();
 
         for (CreateOrderItemRequest itemRequest : request.items()) {
-            ProductResponse product = productClient.getProductById(itemRequest.productId());
+            ProductResponse product = getProduct(itemRequest.productId());
             validateProduct(product, itemRequest.quantity());
 
             BigDecimal subtotal = product.price().multiply(BigDecimal.valueOf(itemRequest.quantity()));
@@ -136,15 +138,51 @@ public class OrderServiceImpl implements OrderService {
 
     private void updateProductsStock(List<CreateOrderItemRequest> items) {
         for (CreateOrderItemRequest item : items) {
-            ProductResponse product = productClient.getProductById(item.productId());
-            productClient.updateStock(product.id(), new UpdateStockRequest(product.stock() - item.quantity()));
+            ProductResponse product = getProduct(item.productId());
+            updateProductStock(product.id(), product.stock() - item.quantity());
         }
     }
 
     private void restoreProductsStock(List<OrderItem> items) {
         for (OrderItem item : items) {
-            ProductResponse product = productClient.getProductById(item.getProductId());
-            productClient.updateStock(product.id(), new UpdateStockRequest(product.stock() + item.getQuantity()));
+            ProductResponse product = getProduct(item.getProductId());
+            updateProductStock(product.id(), product.stock() + item.getQuantity());
+        }
+    }
+
+    private CustomerResponse getCustomer(Long customerId) {
+        try {
+            return customerClient.getCustomerById(customerId);
+        } catch (FeignException.NotFound exception) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found", exception);
+        } catch (RetryableException exception) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Customer service is unavailable", exception);
+        } catch (FeignException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Customer service request failed", exception);
+        }
+    }
+
+    private ProductResponse getProduct(Long productId) {
+        try {
+            return productClient.getProductById(productId);
+        } catch (FeignException.NotFound exception) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found", exception);
+        } catch (RetryableException exception) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Product service is unavailable", exception);
+        } catch (FeignException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Product service request failed", exception);
+        }
+    }
+
+    private void updateProductStock(Long productId, Integer stock) {
+        try {
+            productClient.updateStock(productId, new UpdateStockRequest(stock));
+        } catch (FeignException.NotFound exception) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found", exception);
+        } catch (RetryableException exception) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Product service is unavailable", exception);
+        } catch (FeignException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Product stock update failed", exception);
         }
     }
 
