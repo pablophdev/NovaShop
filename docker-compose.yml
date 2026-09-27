@@ -1,0 +1,121 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: novashop-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - novashop-network
+
+  product-service:
+    build:
+      context: ./product-service
+    image: novashop-product-service:local
+    container_name: novashop-product-service
+    environment:
+      PORT: 8080
+      DB_URL: jdbc:mysql://mysql:3306/db_products
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - novashop-network
+
+  customer-service:
+    build:
+      context: ./customer-service
+    image: novashop-customer-service:local
+    container_name: novashop-customer-service
+    environment:
+      PORT: 8081
+      DB_URL: jdbc:mysql://mysql:3306/db_customers
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - novashop-network
+
+  ms-auth:
+    build:
+      context: ./ms-auth
+    image: novashop-ms-auth:local
+    container_name: novashop-ms-auth
+    environment:
+      PORT: 8083
+      DB_URL: jdbc:mysql://mysql:3306/db_auth
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - novashop-network
+
+  order-service:
+    build:
+      context: ./order-service
+    image: novashop-order-service:local
+    container_name: novashop-order-service
+    environment:
+      PORT: 8082
+      DB_URL: jdbc:mysql://mysql:3306/db_orders
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+      CUSTOMER_SERVICE_URL: http://customer-service:8081
+      PRODUCT_SERVICE_URL: http://product-service:8080
+    depends_on:
+      mysql:
+        condition: service_healthy
+      product-service:
+        condition: service_started
+      customer-service:
+        condition: service_started
+    networks:
+      - novashop-network
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    image: novashop-api-gateway:local
+    container_name: novashop-api-gateway
+    environment:
+      PORT: 9090
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      PRODUCT_SERVICE_URI: http://product-service:8080
+      CUSTOMER_SERVICE_URI: http://customer-service:8081
+      ORDER_SERVICE_URI: http://order-service:8082
+      AUTH_SERVICE_URI: http://ms-auth:8083
+    ports:
+      - "9090:9090"
+    depends_on:
+      product-service:
+        condition: service_started
+      customer-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+      ms-auth:
+        condition: service_started
+    networks:
+      - novashop-network
+
+volumes:
+  mysql-data:
+
+networks:
+  novashop-network:
+    driver: bridge
