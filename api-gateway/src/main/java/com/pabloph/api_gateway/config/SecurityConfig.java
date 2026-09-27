@@ -1,8 +1,10 @@
 package com.pabloph.api_gateway.config;
 
+import com.pabloph.api_gateway.exception.GatewayErrorResponseWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -13,11 +15,20 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 public class SecurityConfig {
 
 	@Bean
-	SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, JwtAuthenticationWebFilter jwtAuthenticationWebFilter) {
+	SecurityWebFilterChain securityWebFilterChain(
+			ServerHttpSecurity http,
+			JwtAuthenticationWebFilter jwtAuthenticationWebFilter,
+			GatewayErrorResponseWriter errorResponseWriter
+	) {
 		return http
 				.csrf(ServerHttpSecurity.CsrfSpec::disable)
 				.httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
 				.formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+				.exceptionHandling(exceptions -> exceptions
+						.authenticationEntryPoint((exchange, exception) ->
+								errorResponseWriter.write(exchange, HttpStatus.UNAUTHORIZED, "Authentication required"))
+						.accessDeniedHandler((exchange, exception) ->
+								errorResponseWriter.write(exchange, HttpStatus.FORBIDDEN, "Access denied")))
 				.authorizeExchange(exchanges -> exchanges
 						.pathMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
 						.pathMatchers(HttpMethod.GET, "/actuator/health").permitAll()
