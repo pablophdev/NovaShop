@@ -30,4 +30,4 @@ spring:
                 - Path=/api/auth/**
 
 jwt:
-  secret: ${JWT_SECRET:nova-shop-local-development-secret-key}
+  secret: ${JWT_SECRET}
