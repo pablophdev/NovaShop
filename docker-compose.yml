@@ -28,6 +28,12 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'bash -ec ''exec 3<>/dev/tcp/127.0.0.1/8080; printf "GET /actuator/health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" >&3; read -r status <&3; case "$$status" in *" 200 "*) exit 0;; *) exit 1;; esac''']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
     networks:
       - novashop-network
 
@@ -44,6 +50,12 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'bash -ec ''exec 3<>/dev/tcp/127.0.0.1/8081; printf "GET /actuator/health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" >&3; read -r status <&3; case "$$status" in *" 200 "*) exit 0;; *) exit 1;; esac''']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
     networks:
       - novashop-network
 
@@ -62,6 +74,12 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'bash -ec ''exec 3<>/dev/tcp/127.0.0.1/8083; printf "GET /actuator/health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" >&3; read -r status <&3; case "$$status" in *" 200 "*) exit 0;; *) exit 1;; esac''']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
     networks:
       - novashop-network
 
@@ -81,9 +99,15 @@ services:
       mysql:
         condition: service_healthy
       product-service:
-        condition: service_started
+        condition: service_healthy
       customer-service:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'bash -ec ''exec 3<>/dev/tcp/127.0.0.1/8082; printf "GET /actuator/health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" >&3; read -r status <&3; case "$$status" in *" 200 "*) exit 0;; *) exit 1;; esac''']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
     networks:
       - novashop-network
 
@@ -103,13 +127,19 @@ services:
       - "9090:9090"
     depends_on:
       product-service:
-        condition: service_started
+        condition: service_healthy
       customer-service:
-        condition: service_started
+        condition: service_healthy
       order-service:
-        condition: service_started
+        condition: service_healthy
       ms-auth:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'bash -ec ''exec 3<>/dev/tcp/127.0.0.1/9090; printf "GET /actuator/health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" >&3; read -r status <&3; case "$$status" in *" 200 "*) exit 0;; *) exit 1;; esac''']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
     networks:
       - novashop-network
 
