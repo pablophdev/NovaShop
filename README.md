@@ -12,7 +12,7 @@ http://localhost:9090
 
 - [Git](https://git-scm.com/)
 - [Docker](https://docs.docker.com/get-docker/) y [Docker Compose](https://docs.docker.com/compose/)
-- [Java 25](https://adoptium.net/) (solo si corrés los servicios fuera de Docker)
+- [Java 25](https://adoptium.net/) (solo si corres los servicios fuera de Docker)
 - Maven Wrapper incluido en cada módulo (`./mvnw`)
 
 ## Clonar el repositorio
