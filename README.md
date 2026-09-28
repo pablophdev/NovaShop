@@ -359,7 +359,19 @@ http://localhost:9090
 
 ## Tests Y Build
 
-Cada servicio se compila y testea por separado.
+Cada servicio se compila y testea por separado. El proyecto incluye tests reales de controladores, servicios, JWT y seguridad del gateway.
+
+Resumen de tests:
+
+| Servicio | Tests principales | Herramientas |
+| --- | --- | --- |
+| `product-service` | `ProductControllerTest`, `CategoryControllerTest`, `ProductServiceImplTest`, `CategoryServiceImplTest` | JUnit 5, MockMvc, Mockito |
+| `customer-service` | `CustomerControllerTest`, `CustomerServiceImplTest` | JUnit 5, MockMvc, Mockito |
+| `ms-auth` | `AuthControllerTest`, `AuthServiceImplTest`, `JwtServiceTest` | JUnit 5, MockMvc, Mockito, JJWT |
+| `order-service` | `OrderControllerTest`, `OrderServiceImplTest` | JUnit 5, MockMvc, Mockito, Feign clients mockeados |
+| `api-gateway` | `SecurityConfigTest`, `JwtAuthenticationWebFilterTest` | JUnit 5, WebTestClient, Spring Security Test, Reactor Test |
+
+Los tests de controladores usan MockMvc en los servicios Spring MVC. El gateway usa WebTestClient porque está basado en WebFlux.
 
 Ejecutar tests desde la raíz:
 
@@ -376,8 +388,6 @@ Compilar un servicio sin tests:
 ```bash
 ./product-service/mvnw -f product-service/pom.xml -DskipTests package
 ```
-
-Los tests actuales son principalmente de carga de contexto Spring. Los servicios con JPA requieren una base MySQL disponible si se ejecutan fuera del entorno esperado.
 
 ## Desarrollo Local Sin Docker
 
