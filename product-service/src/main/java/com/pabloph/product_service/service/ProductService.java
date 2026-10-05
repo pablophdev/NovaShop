@@ -2,6 +2,7 @@ package com.pabloph.product_service.service;
 
 import com.pabloph.product_service.dto.CreateProductRequest;
 import com.pabloph.product_service.dto.ProductResponse;
+import com.pabloph.product_service.dto.StockAdjustmentRequest;
 import com.pabloph.product_service.dto.UpdateProductRequest;
 import com.pabloph.product_service.dto.UpdateStockRequest;
 import jakarta.validation.Valid;
@@ -23,6 +24,10 @@ public interface ProductService {
     ProductResponse updateProduct(Long id, @Valid UpdateProductRequest request);
 
     ProductResponse updateStock(Long id, @Valid UpdateStockRequest request);
+
+    ProductResponse decrementStock(Long id, @Valid StockAdjustmentRequest request);
+
+    ProductResponse incrementStock(Long id, @Valid StockAdjustmentRequest request);
 
     void deleteProduct(Long id);
 }

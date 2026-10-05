@@ -1,6 +1,7 @@
 package com.pabloph.order_service.client;
 
 import com.pabloph.order_service.dto.client.ProductResponse;
+import com.pabloph.order_service.dto.client.StockAdjustmentRequest;
 import com.pabloph.order_service.dto.client.UpdateStockRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,4 +17,10 @@ public interface ProductClient {
 
     @PatchMapping("/api/products/{id}/stock")
     ProductResponse updateStock(@PathVariable Long id, @RequestBody UpdateStockRequest request);
+
+    @PatchMapping("/api/products/{id}/stock/decrement")
+    ProductResponse decrementStock(@PathVariable Long id, @RequestBody StockAdjustmentRequest request);
+
+    @PatchMapping("/api/products/{id}/stock/increment")
+    ProductResponse incrementStock(@PathVariable Long id, @RequestBody StockAdjustmentRequest request);
 }

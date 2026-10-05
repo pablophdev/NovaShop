@@ -2,6 +2,7 @@ package com.pabloph.product_service.controller;
 
 import com.pabloph.product_service.dto.CreateProductRequest;
 import com.pabloph.product_service.dto.ProductResponse;
+import com.pabloph.product_service.dto.StockAdjustmentRequest;
 import com.pabloph.product_service.dto.UpdateProductRequest;
 import com.pabloph.product_service.dto.UpdateStockRequest;
 import com.pabloph.product_service.service.ProductService;
@@ -70,6 +71,22 @@ public class ProductController {
             @Valid @RequestBody UpdateStockRequest request
     ) {
         return ResponseEntity.ok(productService.updateStock(id, request));
+    }
+
+    @PatchMapping("/{id}/stock/decrement")
+    public ResponseEntity<ProductResponse> decrementStock(
+            @PathVariable Long id,
+            @Valid @RequestBody StockAdjustmentRequest request
+    ) {
+        return ResponseEntity.ok(productService.decrementStock(id, request));
+    }
+
+    @PatchMapping("/{id}/stock/increment")
+    public ResponseEntity<ProductResponse> incrementStock(
+            @PathVariable Long id,
+            @Valid @RequestBody StockAdjustmentRequest request
+    ) {
+        return ResponseEntity.ok(productService.incrementStock(id, request));
     }
 
     @DeleteMapping("/{id}")

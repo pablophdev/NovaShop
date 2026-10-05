@@ -2,6 +2,7 @@ package com.pabloph.product_service.service;
 
 import com.pabloph.product_service.dto.CreateProductRequest;
 import com.pabloph.product_service.dto.ProductResponse;
+import com.pabloph.product_service.dto.StockAdjustmentRequest;
 import com.pabloph.product_service.dto.UpdateStockRequest;
 import com.pabloph.product_service.entity.Category;
 import com.pabloph.product_service.entity.Product;
@@ -28,6 +29,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -117,6 +119,43 @@ class ProductServiceImplTest {
         assertThat(response.stock()).isEqualTo(7);
         assertThat(product.getStock()).isEqualTo(7);
         assertThat(product.getUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    void decrementStockUsesAtomicRepositoryUpdate() {
+        Product product = product(1L, "Keyboard", "KEY-001", 7);
+
+        when(productRepository.decrementStockIfAvailable(eq(1L), eq(5), any())).thenReturn(1);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+        ProductResponse response = productService.decrementStock(1L, new StockAdjustmentRequest(5));
+
+        assertThat(response.stock()).isEqualTo(7);
+        verify(productRepository).decrementStockIfAvailable(eq(1L), eq(5), any());
+    }
+
+    @Test
+    void decrementStockThrowsBadRequestWhenStockIsInsufficient() {
+        when(productRepository.decrementStockIfAvailable(eq(1L), eq(5), any())).thenReturn(0);
+        when(productRepository.existsById(1L)).thenReturn(true);
+
+        assertThatThrownBy(() -> productService.decrementStock(1L, new StockAdjustmentRequest(5)))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(exception -> ((ResponseStatusException) exception).getStatusCode())
+                .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void incrementStockUsesAtomicRepositoryUpdate() {
+        Product product = product(1L, "Keyboard", "KEY-001", 14);
+
+        when(productRepository.incrementStock(eq(1L), eq(2), any())).thenReturn(1);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+        ProductResponse response = productService.incrementStock(1L, new StockAdjustmentRequest(2));
+
+        assertThat(response.stock()).isEqualTo(14);
+        verify(productRepository).incrementStock(eq(1L), eq(2), any());
     }
 
     @Test

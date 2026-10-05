@@ -4,7 +4,7 @@ import com.pabloph.order_service.client.CustomerClient;
 import com.pabloph.order_service.client.ProductClient;
 import com.pabloph.order_service.dto.client.CustomerResponse;
 import com.pabloph.order_service.dto.client.ProductResponse;
-import com.pabloph.order_service.dto.client.UpdateStockRequest;
+import com.pabloph.order_service.dto.client.StockAdjustmentRequest;
 import com.pabloph.order_service.dto.order.CreateOrderItemRequest;
 import com.pabloph.order_service.dto.order.CreateOrderRequest;
 import com.pabloph.order_service.dto.order.OrderItemResponse;
@@ -138,15 +138,13 @@ public class OrderServiceImpl implements OrderService {
 
     private void updateProductsStock(List<CreateOrderItemRequest> items) {
         for (CreateOrderItemRequest item : items) {
-            ProductResponse product = getProduct(item.productId());
-            updateProductStock(product.id(), product.stock() - item.quantity());
+            decrementProductStock(item.productId(), item.quantity());
         }
     }
 
     private void restoreProductsStock(List<OrderItem> items) {
         for (OrderItem item : items) {
-            ProductResponse product = getProduct(item.getProductId());
-            updateProductStock(product.id(), product.stock() + item.getQuantity());
+            incrementProductStock(item.getProductId(), item.getQuantity());
         }
     }
 
@@ -174,9 +172,23 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private void updateProductStock(Long productId, Integer stock) {
+    private void decrementProductStock(Long productId, Integer quantity) {
         try {
-            productClient.updateStock(productId, new UpdateStockRequest(stock));
+            productClient.decrementStock(productId, new StockAdjustmentRequest(quantity));
+        } catch (FeignException.NotFound exception) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found", exception);
+        } catch (FeignException.BadRequest exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient product stock", exception);
+        } catch (RetryableException exception) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Product service is unavailable", exception);
+        } catch (FeignException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Product stock update failed", exception);
+        }
+    }
+
+    private void incrementProductStock(Long productId, Integer quantity) {
+        try {
+            productClient.incrementStock(productId, new StockAdjustmentRequest(quantity));
         } catch (FeignException.NotFound exception) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found", exception);
         } catch (RetryableException exception) {

@@ -4,7 +4,7 @@ import com.pabloph.order_service.client.CustomerClient;
 import com.pabloph.order_service.client.ProductClient;
 import com.pabloph.order_service.dto.client.CustomerResponse;
 import com.pabloph.order_service.dto.client.ProductResponse;
-import com.pabloph.order_service.dto.client.UpdateStockRequest;
+import com.pabloph.order_service.dto.client.StockAdjustmentRequest;
 import com.pabloph.order_service.dto.order.CreateOrderItemRequest;
 import com.pabloph.order_service.dto.order.CreateOrderRequest;
 import com.pabloph.order_service.dto.order.OrderResponse;
@@ -62,7 +62,7 @@ class OrderServiceImplTest {
         CreateOrderRequest request = createOrderRequest();
         when(customerClient.getCustomerById(1L)).thenReturn(customer(true));
         when(productClient.getProductById(10L)).thenReturn(product(10));
-        when(productClient.updateStock(any(), any(UpdateStockRequest.class))).thenReturn(product(8));
+        when(productClient.decrementStock(any(), any(StockAdjustmentRequest.class))).thenReturn(product(8));
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> {
             Order order = invocation.getArgument(0);
             order.setId(100L);
@@ -83,9 +83,9 @@ class OrderServiceImplTest {
         assertThat(response.items().get(0).productId()).isEqualTo(10L);
         assertThat(response.items().get(0).quantity()).isEqualTo(2);
 
-        ArgumentCaptor<UpdateStockRequest> stockCaptor = ArgumentCaptor.forClass(UpdateStockRequest.class);
-        verify(productClient).updateStock(org.mockito.ArgumentMatchers.eq(10L), stockCaptor.capture());
-        assertThat(stockCaptor.getValue().stock()).isEqualTo(8);
+        ArgumentCaptor<StockAdjustmentRequest> stockCaptor = ArgumentCaptor.forClass(StockAdjustmentRequest.class);
+        verify(productClient).decrementStock(org.mockito.ArgumentMatchers.eq(10L), stockCaptor.capture());
+        assertThat(stockCaptor.getValue().quantity()).isEqualTo(2);
         verify(orderRepository, times(2)).save(any(Order.class));
     }
 
@@ -114,7 +114,7 @@ class OrderServiceImplTest {
                 .extracting(exception -> ((ResponseStatusException) exception).getStatusCode())
                 .isEqualTo(HttpStatus.BAD_REQUEST);
 
-        verify(productClient, never()).updateStock(any(), any());
+        verify(productClient, never()).decrementStock(any(), any());
         verify(orderRepository, never()).save(any());
     }
 
@@ -154,17 +154,16 @@ class OrderServiceImplTest {
     void cancelOrderCancelsConfirmedOrderAndRestoresStock() {
         Order order = order(OrderStatus.CONFIRMED);
         when(orderRepository.findById(100L)).thenReturn(Optional.of(order));
-        when(productClient.getProductById(10L)).thenReturn(product(8));
-        when(productClient.updateStock(any(), any(UpdateStockRequest.class))).thenReturn(product(10));
+        when(productClient.incrementStock(any(), any(StockAdjustmentRequest.class))).thenReturn(product(10));
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         OrderResponse response = orderService.cancelOrder(100L);
 
         assertThat(response.status()).isEqualTo(OrderStatus.CANCELLED);
 
-        ArgumentCaptor<UpdateStockRequest> stockCaptor = ArgumentCaptor.forClass(UpdateStockRequest.class);
-        verify(productClient).updateStock(org.mockito.ArgumentMatchers.eq(10L), stockCaptor.capture());
-        assertThat(stockCaptor.getValue().stock()).isEqualTo(10);
+        ArgumentCaptor<StockAdjustmentRequest> stockCaptor = ArgumentCaptor.forClass(StockAdjustmentRequest.class);
+        verify(productClient).incrementStock(org.mockito.ArgumentMatchers.eq(10L), stockCaptor.capture());
+        assertThat(stockCaptor.getValue().quantity()).isEqualTo(2);
     }
 
     @Test
@@ -176,7 +175,8 @@ class OrderServiceImplTest {
                 .extracting(exception -> ((ResponseStatusException) exception).getStatusCode())
                 .isEqualTo(HttpStatus.BAD_REQUEST);
 
-        verify(productClient, never()).updateStock(any(), any());
+        verify(productClient, never()).decrementStock(any(), any());
+        verify(productClient, never()).incrementStock(any(), any());
         verify(orderRepository, never()).save(any());
     }
 

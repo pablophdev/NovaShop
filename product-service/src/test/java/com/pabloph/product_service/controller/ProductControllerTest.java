@@ -2,6 +2,7 @@ package com.pabloph.product_service.controller;
 
 import com.pabloph.product_service.dto.CreateProductRequest;
 import com.pabloph.product_service.dto.ProductResponse;
+import com.pabloph.product_service.dto.StockAdjustmentRequest;
 import com.pabloph.product_service.dto.UpdateStockRequest;
 import com.pabloph.product_service.exception.GlobalExceptionHandler;
 import com.pabloph.product_service.service.ProductService;
@@ -151,6 +152,60 @@ class ProductControllerTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.stock").value(5));
+    }
+
+    @Test
+    void decrementStockReturnsUpdatedProduct() throws Exception {
+        ProductResponse response = new ProductResponse(
+                1L,
+                "Keyboard",
+                "KEY-001",
+                "Mechanical keyboard",
+                BigDecimal.valueOf(99.99),
+                10,
+                true,
+                "Electronics",
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+        when(productService.decrementStock(eq(1L), any(StockAdjustmentRequest.class))).thenReturn(response);
+
+        mockMvc.perform(patch("/api/products/{id}/stock/decrement", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "quantity": 2
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.stock").value(10));
+    }
+
+    @Test
+    void incrementStockReturnsUpdatedProduct() throws Exception {
+        ProductResponse response = new ProductResponse(
+                1L,
+                "Keyboard",
+                "KEY-001",
+                "Mechanical keyboard",
+                BigDecimal.valueOf(99.99),
+                14,
+                true,
+                "Electronics",
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+        when(productService.incrementStock(eq(1L), any(StockAdjustmentRequest.class))).thenReturn(response);
+
+        mockMvc.perform(patch("/api/products/{id}/stock/increment", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "quantity": 2
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.stock").value(14));
     }
 
     private static ProductResponse productResponse() {

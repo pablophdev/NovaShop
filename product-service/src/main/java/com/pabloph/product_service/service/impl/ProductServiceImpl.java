@@ -2,6 +2,7 @@ package com.pabloph.product_service.service.impl;
 
 import com.pabloph.product_service.dto.CreateProductRequest;
 import com.pabloph.product_service.dto.ProductResponse;
+import com.pabloph.product_service.dto.StockAdjustmentRequest;
 import com.pabloph.product_service.dto.UpdateProductRequest;
 import com.pabloph.product_service.dto.UpdateStockRequest;
 import com.pabloph.product_service.entity.Category;
@@ -114,6 +115,29 @@ public class ProductServiceImpl implements ProductService {
         product.setUpdatedAt(LocalDateTime.now());
 
         return toResponse(productRepository.save(product));
+    }
+
+    @Override
+    public ProductResponse decrementStock(Long id, StockAdjustmentRequest request) {
+        int updatedRows = productRepository.decrementStockIfAvailable(id, request.quantity(), LocalDateTime.now());
+        if (updatedRows == 0) {
+            if (!productRepository.existsById(id)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+            }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient product stock");
+        }
+
+        return toResponse(getProduct(id));
+    }
+
+    @Override
+    public ProductResponse incrementStock(Long id, StockAdjustmentRequest request) {
+        int updatedRows = productRepository.incrementStock(id, request.quantity(), LocalDateTime.now());
+        if (updatedRows == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        }
+
+        return toResponse(getProduct(id));
     }
 
     @Override
