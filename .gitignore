@@ -2,3 +2,6 @@
 .env.*
 !.env.example
 !**/.env.example
+
+.vscode/launch.json
+!.vscode/launch.example.json

@@ -1,7 +1,4 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
@@ -19,7 +16,7 @@
             "env": {
                 "DB_URL": "jdbc:mysql://localhost:3306/db_products",
                 "DB_USERNAME": "root",
-                "DB_PASSWORD": "123123"
+                "DB_PASSWORD": "replace-with-local-password"
             }
         },
         {
@@ -31,7 +28,7 @@
             "env": {
                 "DB_URL": "jdbc:mysql://localhost:3306/db_customers",
                 "DB_USERNAME": "root",
-                "DB_PASSWORD": "123123"
+                "DB_PASSWORD": "replace-with-local-password"
             }
         },
         {
@@ -43,7 +40,7 @@
             "env": {
                 "DB_URL": "jdbc:mysql://localhost:3306/db_orders",
                 "DB_USERNAME": "root",
-                "DB_PASSWORD": "123123",
+                "DB_PASSWORD": "replace-with-local-password",
                 "CUSTOMER_SERVICE_URL": "http://localhost:8081",
                 "PRODUCT_SERVICE_URL": "http://localhost:8080"
             }
@@ -57,8 +54,8 @@
             "env": {
                 "DB_URL": "jdbc:mysql://localhost:3306/db_auth",
                 "DB_USERNAME": "root",
-                "DB_PASSWORD": "123123",
-                "JWT_SECRET": "nova-shop-local-development-secret-key",
+                "DB_PASSWORD": "replace-with-local-password",
+                "JWT_SECRET": "replace-with-local-jwt-secret-at-least-32-characters",
                 "JWT_EXPIRATION": "3600000"
             }
         },
@@ -73,7 +70,7 @@
                 "CUSTOMER_SERVICE_URI": "http://localhost:8081",
                 "ORDER_SERVICE_URI": "http://localhost:8082",
                 "AUTH_SERVICE_URI": "http://localhost:8083",
-                "JWT_SECRET": "nova-shop-local-development-secret-key"
+                "JWT_SECRET": "replace-with-local-jwt-secret-at-least-32-characters"
             }
         }
     ]
